@@ -99,14 +99,14 @@ class FaceViewModel extends ReactiveViewModel {
       DateTime now = DateTime.now();
       log.i(lastUpdatedOn);
       log.i(now);
-      log.i(lastUpdatedOn.difference(now).inMilliseconds);
-      if (lastUpdatedOn.difference(now).inMilliseconds > 100) {
+      log.i(now.difference(lastUpdatedOn).inMilliseconds);
+      log.i(lastUpdatedOn.difference(now).inMilliseconds > 100);
+      if (now.difference(lastUpdatedOn).inMilliseconds > 500) {
         lastUpdatedOn = now;
         _count++;
         notifyListeners();
       }
 
-      log.i(_count);
       if (_count == 2) {
         setR2(value: true);
       } else if (_count == 4) {

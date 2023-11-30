@@ -60,7 +60,6 @@ class MlKitService with ListenableServiceMixin {
         text += 'face: ${face.boundingBox}\n\n';
       }
       _text = text;
-      // TODO: set _customPaint to draw boundingRect on top of image
       _customPaint = null;
     }
     _isBusy = false;
