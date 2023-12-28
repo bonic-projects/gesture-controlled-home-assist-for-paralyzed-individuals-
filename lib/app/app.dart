@@ -11,6 +11,7 @@ import 'package:navigest/services/camera_service.dart';
 import 'package:navigest/services/ml_kit_service.dart';
 import 'package:navigest/ui/views/speech/speech_view.dart';
 import 'package:navigest/ui/views/face/face_view.dart';
+import 'package:navigest/ui/views/automatic/automatic_view.dart';
 // @stacked-import
 
 @StackedApp(
@@ -20,6 +21,7 @@ import 'package:navigest/ui/views/face/face_view.dart';
     MaterialRoute(page: ManualView),
     MaterialRoute(page: SpeechView),
     MaterialRoute(page: FaceView),
+    MaterialRoute(page: AutomaticView),
 // @stacked-route
   ],
   dependencies: [

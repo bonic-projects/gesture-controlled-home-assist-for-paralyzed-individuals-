@@ -24,12 +24,14 @@ class DeviceData {
   bool r2;
   bool r3;
   bool r4;
+  String phone;
 
   DeviceData({
     required this.r1,
     required this.r2,
     required this.r3,
     required this.r4,
+    required this.phone,
   });
 
   factory DeviceData.fromMap(Map data) {
@@ -38,6 +40,7 @@ class DeviceData {
       r2: data['r2'] ?? false,
       r3: data['r3'] ?? false,
       r4: data['r4'] ?? false,
+      phone: data['phone'] ?? "",
     );
   }
 

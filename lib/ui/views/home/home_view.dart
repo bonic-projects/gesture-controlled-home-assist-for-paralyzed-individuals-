@@ -26,7 +26,7 @@ class HomeView extends StatelessWidget {
                   file: 'assets/lottie/control.json'),
               Option(
                   name: 'Speech',
-                  onTap: model.openAutomaticView,
+                  onTap: model.openSpeechView,
                   file: 'assets/lottie/speech.json'),
               // Option(
               //     name: 'Object Train',
@@ -36,6 +36,10 @@ class HomeView extends StatelessWidget {
                   name: 'Face recog',
                   onTap: model.openFaceTestView,
                   file: 'assets/lottie/face.json'),
+              Option(
+                  name: 'Automatic',
+                  onTap: model.openAutomaticView,
+                  file: 'assets/lottie/patient.json'),
             ],
           ),
         );
@@ -49,6 +53,7 @@ class Option extends StatelessWidget {
   final String name;
   final VoidCallback onTap;
   final String file;
+
   const Option(
       {Key? key, required this.name, required this.onTap, required this.file})
       : super(key: key);

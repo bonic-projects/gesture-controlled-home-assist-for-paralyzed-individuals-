@@ -1,3 +1,4 @@
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:navigest/services/database_service.dart';
 import 'package:stacked/stacked.dart';
 
@@ -20,11 +21,26 @@ class ManualViewModel extends ReactiveViewModel {
   //Device data
 
   DeviceData _deviceData =
-      DeviceData(r1: false, r2: false, r3: false, r4: false);
+      DeviceData(r1: false, r2: false, r3: false, r4: false, phone: "");
+
   DeviceData get deviceData => _deviceData;
 
   void setDeviceData() {
     _dbService.setDeviceData(_deviceData);
+  }
+
+  bool _isCalling = false;
+
+  bool get isCalling => _isCalling;
+
+  callNumber() async {
+    String number = _deviceData.phone; //set the number here
+    bool? res = await FlutterPhoneDirectCaller.callNumber(number);
+    _isCalling = res ?? false;
+    notifyListeners();
+    Future.delayed(const Duration(seconds: 100));
+    _isCalling = false;
+    notifyListeners();
   }
 
   void getDeviceData() async {
@@ -36,9 +52,11 @@ class ManualViewModel extends ReactiveViewModel {
         r2: deviceData.r2,
         r3: deviceData.r3,
         r4: deviceData.r4,
+        phone: deviceData.phone,
       );
     } else {
-      _deviceData = DeviceData(r1: false, r2: false, r3: false, r4: false);
+      _deviceData =
+          DeviceData(r1: false, r2: false, r3: false, r4: false, phone: "");
     }
     setBusy(false);
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -125,6 +126,11 @@ class SpeechViewModel extends ReactiveViewModel {
     } else if (text.contains("lamp") && text.contains("off")) {
       setR4(value: false);
       return false;
+    } else if (text.contains("call") || text.contains("nurse")) {
+      log.i("Calling..");
+
+      callNumber();
+      return false;
     } else if (text.contains("Malayalam")) {
       _isMalayalam = true;
       // _ttsService.setLanguage(1);
@@ -148,7 +154,7 @@ class SpeechViewModel extends ReactiveViewModel {
   }
 
   DeviceData _deviceData =
-      DeviceData(r1: false, r2: false, r3: false, r4: false);
+      DeviceData(r1: false, r2: false, r3: false, r4: false, phone: "");
 
   DeviceData get deviceData => _deviceData;
 
@@ -165,9 +171,11 @@ class SpeechViewModel extends ReactiveViewModel {
         r2: deviceData.r2,
         r3: deviceData.r3,
         r4: deviceData.r4,
+        phone: deviceData.phone,
       );
     } else {
-      _deviceData = DeviceData(r1: false, r2: false, r3: false, r4: false);
+      _deviceData =
+          DeviceData(r1: false, r2: false, r3: false, r4: false, phone: "");
     }
     setBusy(false);
   }
@@ -202,6 +210,20 @@ class SpeechViewModel extends ReactiveViewModel {
       title: title,
       description: description,
     );
+  }
+
+  bool _isCalling = false;
+
+  bool get isCalling => _isCalling;
+
+  callNumber() async {
+    String number = _deviceData.phone; //set the number here
+    bool? res = await FlutterPhoneDirectCaller.callNumber(number);
+    _isCalling = res ?? false;
+    notifyListeners();
+    Future.delayed(const Duration(seconds: 100));
+    _isCalling = false;
+    notifyListeners();
   }
 
   void showBottomSheet() {

@@ -15,8 +15,12 @@ class HomeViewModel extends BaseViewModel {
     _navigationService.navigateTo(Routes.manualView);
   }
 
-  void openAutomaticView() {
+  void openSpeechView() {
     _navigationService.navigateTo(Routes.speechView);
+  }
+
+  void openAutomaticView() {
+    _navigationService.navigateTo(Routes.automaticView);
   }
 
   void openFaceTestView() {

@@ -17,6 +17,7 @@ class MlKitService with ListenableServiceMixin {
       enableClassification: true,
     ),
   );
+
   final bool _canProcess = true;
   bool _isBusy = false;
   CustomPaint? _customPaint;

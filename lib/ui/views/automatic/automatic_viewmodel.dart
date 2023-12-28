@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -16,8 +17,8 @@ import '../../../services/database_service.dart';
 import '../../../services/ml_kit_service.dart';
 import '../../common/app_strings.dart';
 
-class FaceViewModel extends ReactiveViewModel {
-  final log = getLogger('FaceViewModel');
+class AutomaticViewModel extends ReactiveViewModel {
+  final log = getLogger('AutomaticViewModel');
 
   final _dialogService = locator<DialogService>();
   final _bottomSheetService = locator<BottomSheetService>();
@@ -48,6 +49,7 @@ class FaceViewModel extends ReactiveViewModel {
   Timer? periodicTimer;
 
   void onModelReady() async {
+    getDeviceData();
     _cameraService.initialize(
         true, getInputImage, onCameraFeedReady, CameraLensDirection.front);
     lastUpdatedOn = DateTime.now();
@@ -68,14 +70,12 @@ class FaceViewModel extends ReactiveViewModel {
   void getInputImage(InputImage inputImage) {
     // logger.i("Processing.. ${inputImage.metadata?.size}, ${inputImage.metadata?.rotation}");
     _mlKitService.processImage(inputImage);
-    if (_isFollowing) processFaceAndMove();
+    processFace();
   }
 
   double get xPos => _mlKitService.xPos;
 
   double get yPos => _mlKitService.yPos;
-
-  final bool _isFollowing = true;
 
   int _count = 0;
 
@@ -83,39 +83,102 @@ class FaceViewModel extends ReactiveViewModel {
 
   late DateTime lastUpdatedOn;
 
-  void processFaceAndMove() {
+  bool _isEyesOpen = false;
+
+  DateTime _lastUpdatedOnIndex = DateTime.now();
+
+  void processFace() {
     // Check xPos for left/right control
     if (leftEyeOpenProb != null &&
-        leftEyeOpenProb! < 30 &&
+        leftEyeOpenProb! < 35 &&
         rightEyeOpenProb != null &&
-        rightEyeOpenProb! < 60) {
+        rightEyeOpenProb! < 35 &&
+        _isEyesOpen) {
+      _isEyesOpen = false;
       DateTime now = DateTime.now();
       // log.i(lastUpdatedOn);
       // log.i(now);
       // log.i(now.difference(lastUpdatedOn).inMilliseconds);
       // log.i(lastUpdatedOn.difference(now).inMilliseconds > 100);
-      if (now.difference(lastUpdatedOn).inMilliseconds > 500) {
+      if (now.difference(lastUpdatedOn).inMilliseconds > 700) {
         lastUpdatedOn = now;
         _count++;
+        if (_count > 3) {
+          _isEnable = true;
+          _count = 0;
+        }
+        if (_isEnable) {
+          control(_selectionIndex);
+        }
         notifyListeners();
       }
-
-      if (_count == 2) {
-        setR2(value: true);
-      } else if (_count == 4) {
-        setR2(value: false);
-        _count = 0;
+    } else if (leftEyeOpenProb != null &&
+        leftEyeOpenProb! < 55 &&
+        _isEyesOpen) {
+      DateTime now = DateTime.now();
+      if (now.difference(_lastUpdatedOnIndex).inMilliseconds > 700 &&
+          _selectionIndex < 4 &&
+          _isEnable) {
+        _lastUpdatedOnIndex = now;
+        _selectionIndex++;
+        notifyListeners();
       }
-    } else if (leftEyeOpenProb != null && leftEyeOpenProb! < 20) {
-      setR1(value: true);
-    } else if (rightEyeOpenProb != null && rightEyeOpenProb! < 40) {
-      setR1(value: false);
+    } else if (rightEyeOpenProb != null &&
+        rightEyeOpenProb! < 50 &&
+        _isEyesOpen) {
+      DateTime now = DateTime.now();
+
+      if (now.difference(_lastUpdatedOnIndex).inMilliseconds > 700 &&
+          _selectionIndex > 0 &&
+          _isEnable) {
+        _lastUpdatedOnIndex = now;
+
+        _selectionIndex--;
+        notifyListeners();
+      }
+    } else {
+      _isEyesOpen = true;
     }
   }
 
-  void switchCam() {
-    int? id = camController!.cameraId;
-    log.i("Camera id: $id");
+  //===========================
+  bool _isEnable = false;
+
+  bool get isEnable => _isEnable;
+  int _selectionIndex = 0;
+
+  int get selectionIndex => _selectionIndex;
+
+  void control(int index) {
+    if (index == 0) {
+      setR1();
+    } else if (index == 1) {
+      setR2();
+    } else if (index == 2) {
+      setR3();
+    } else if (index == 3) {
+      setR4();
+    } else if (index == 4) {
+      callNumber();
+    }
+  }
+
+  ///===========================================
+
+  int _camId = 0;
+
+  int get camId => _camId;
+
+  void switchCam() async {
+    int? id = camController!.description.lensDirection.index;
+    _camId = id == 0 ? 1 : 0;
+    log.i("Camera id: $_camId");
+    _cameraFeedReady = false;
+    notifyListeners();
+    await _cameraService.stopLiveFeed();
+    _cameraService.initialize(true, getInputImage, onCameraFeedReady,
+        id == 0 ? CameraLensDirection.back : CameraLensDirection.front);
+    notifyListeners();
   }
 
   //=====================================================
@@ -176,6 +239,20 @@ class FaceViewModel extends ReactiveViewModel {
       title: 'Stacked Rocks!',
       description: 'Give stacked stars on Github',
     );
+  }
+
+  bool _isCalling = false;
+
+  bool get isCalling => _isCalling;
+
+  callNumber() async {
+    String number = _deviceData.phone; //set the number here
+    bool? res = await FlutterPhoneDirectCaller.callNumber(number);
+    _isCalling = res ?? false;
+    notifyListeners();
+    Future.delayed(const Duration(seconds: 100));
+    _isCalling = false;
+    notifyListeners();
   }
 
   void showBottomSheet() {

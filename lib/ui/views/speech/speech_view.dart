@@ -99,6 +99,12 @@ class SpeechView extends StackedView<SpeechViewModel> {
                   isTrue: viewModel.deviceData.r4,
                   onTap: viewModel.setR4,
                 ),
+                ConditionButton(
+                  text1: "Hangup",
+                  text2: "Call nurse",
+                  isTrue: viewModel.isCalling,
+                  onTap: viewModel.callNumber,
+                ),
               ],
             ),
           ),

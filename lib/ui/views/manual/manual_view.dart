@@ -62,6 +62,12 @@ class _HomeBody extends ViewModelWidget<ManualViewModel> {
               isTrue: model.deviceData.r4,
               onTap: model.setR4,
             ),
+            ConditionButton(
+              text1: "Hangup",
+              text2: "Call nurse",
+              isTrue: model.isCalling,
+              onTap: model.callNumber,
+            ),
           ],
         ),
       ),

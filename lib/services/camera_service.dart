@@ -29,6 +29,7 @@ class CameraService {
     bool isMounted,
     Function(InputImage inputImage) onImage,
     VoidCallback onCameraFeedReady,
+    CameraLensDirection cameraLensDirection,
   ) async {
     _onImage = onImage; // Store the onImage function as an instance variable
 
@@ -36,8 +37,13 @@ class CameraService {
       _cameras = await availableCameras();
     }
     for (var i = 0; i < _cameras.length; i++) {
-      if (_cameras[i].lensDirection == CameraLensDirection.front) {
+      if (_cameras[i].lensDirection == CameraLensDirection.front &&
+          cameraLensDirection == CameraLensDirection.front) {
         //Front cam only
+        _cameraIndex = i;
+        break;
+      } else if (_cameras[i].lensDirection == CameraLensDirection.back &&
+          cameraLensDirection == CameraLensDirection.back) {
         _cameraIndex = i;
         break;
       }
